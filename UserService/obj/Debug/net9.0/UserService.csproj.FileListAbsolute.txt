@@ -6,6 +6,7 @@ E:\Backend\Csharp\Inno_Shop\UserService\obj\Debug\net9.0\UserService.AssemblyInf
 E:\Backend\Csharp\Inno_Shop\UserService\obj\Debug\net9.0\UserService.csproj.CoreCompileInputs.cache
 E:\Backend\Csharp\Inno_Shop\UserService\obj\Debug\net9.0\UserService.MvcApplicationPartsAssemblyInfo.cs
 E:\Backend\Csharp\Inno_Shop\UserService\obj\Debug\net9.0\UserService.MvcApplicationPartsAssemblyInfo.cache
+E:\Backend\Csharp\Inno_Shop\UserService\obj\Debug\net9.0\UserService.sourcelink.json
 E:\Backend\Csharp\Inno_Shop\UserService\bin\Debug\net9.0\appsettings.Development.json
 E:\Backend\Csharp\Inno_Shop\UserService\bin\Debug\net9.0\global.json
 E:\Backend\Csharp\Inno_Shop\UserService\bin\Debug\net9.0\src\UserService.API\appsettings.json

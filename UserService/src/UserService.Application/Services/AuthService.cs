@@ -75,43 +75,42 @@ public async Task ConfirmEmailAsync(string token)
     
     user.EmailConfirmed = true;
     user.ConfirmationToken = null;
-    await _userRepository.UpdateAsync(user);
-    await _userRepository.SaveChangesAsync(); // Сохранение в БД
+    await _userRepository.UpdateAsync(user); // SaveChanges уже вызывается внутри UpdateAsync
 }
-
-    public async Task ForgotPasswordAsync(string email)
-    {
-        throw new NotImplementedException();
-    }
+ public Task ForgotPasswordAsync(string email)
+{
+    throw new NotImplementedException();
+}
 
     public async Task ResetPasswordAsync(ResetPasswordDto dto)
     {
         throw new NotImplementedException();
     }
 
-    public string GenerateJwtToken(User user)
+public string GenerateJwtToken(User user)
+{
+    var claims = new[]
     {
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role),
-            new Claim("email_confirmed", user.EmailConfirmed.ToString())
-        };
+        // Используем стандартные ClaimTypes
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Role),
+        new Claim("email_confirmed", user.EmailConfirmed.ToString())
+    };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-            signingCredentials: creds
-        );
+    var token = new JwtSecurityToken(
+        issuer: _jwtSettings.Issuer,
+        audience: _jwtSettings.Audience,
+        claims: claims,
+        expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+        signingCredentials: creds
+    );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
+    return new JwtSecurityTokenHandler().WriteToken(token);
+}
 
 private async Task SendConfirmationEmail(User user)
 {

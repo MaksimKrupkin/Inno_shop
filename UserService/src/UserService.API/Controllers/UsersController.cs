@@ -94,31 +94,41 @@ namespace UserService.API.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto updateDto)
+[HttpPut("{id}")]
+[Authorize]
+public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto updateDto)
+{
+    try
+    {
+        var currentUserId = GetCurrentUserId();
+        var currentUserRole = GetCurrentUserRole();
+
+        // Проверка подтверждения email через claim
+        var isEmailConfirmed = User.FindFirst("email_confirmed")?.Value;
+        if (isEmailConfirmed?.ToLower() != "true")
         {
-            try
-            {
-                var currentUserId = GetCurrentUserId();
-                var currentUserRole = GetCurrentUserRole();
-
-                if (currentUserId != id && currentUserRole != "Admin")
-                    return Forbid();
-
-                await _userService.UpdateUserAsync(id, updateDto);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "User {UserId} not found", id);
-                return NotFound(new { Error = "User not found" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating user {UserId}", id);
-                return StatusCode(500, new { Error = "Internal server error" });
-            }
+            return Unauthorized(new { Error = "Email не подтвержден" });
         }
+
+        // Проверка прав доступа
+        if (currentUserId != id && currentUserRole != "Admin")
+        {
+            return Forbid();
+        }
+
+        await _userService.UpdateUserAsync(id, updateDto);
+        return NoContent();
+    }
+    catch (KeyNotFoundException)
+    {
+        return NotFound(new { Error = "Пользователь не найден" });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Ошибка при обновлении пользователя");
+        return StatusCode(500, new { Error = "Внутренняя ошибка сервера" });
+    }
+}
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
@@ -181,13 +191,15 @@ namespace UserService.API.Controllers
             });
         }
 
-        private Guid GetCurrentUserId()
-	{
-    	var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    	if (Guid.TryParse(claim, out var userId))
-        	return userId;
-    	throw new UnauthorizedAccessException("Invalid user ID");
-	}
+private Guid GetCurrentUserId()
+{
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    if (Guid.TryParse(userIdClaim, out Guid userId))
+    {
+        return userId;
+    }
+    throw new UnauthorizedAccessException("Invalid user ID in token");
+}
 
         private string GetCurrentUserRole()
         {

@@ -118,9 +118,13 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync();
     }
     
-	public async Task<User?> GetByConfirmationTokenAsync(string token)
-	{
-    	return await _context.Users
-        	.FirstOrDefaultAsync(u => u.ConfirmationToken == token);
-	}
+public async Task<User?> GetByConfirmationTokenAsync(string token)
+{
+    return await _context.Users
+        .FirstOrDefaultAsync(u => 
+            u.ConfirmationToken == token && 
+            !u.IsDeleted && 
+            !u.EmailConfirmed
+        );
+}
 }

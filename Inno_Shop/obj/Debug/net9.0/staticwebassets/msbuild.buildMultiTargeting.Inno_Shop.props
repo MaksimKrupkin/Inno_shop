@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Inno_Shop.props" />
+</Project>

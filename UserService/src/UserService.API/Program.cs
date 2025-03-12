@@ -9,6 +9,7 @@ using UserService.Infrastructure.Data;
 using UserService.Application.DTOs;
 using UserService.Infrastructure.Repositories;
 using UserService.Infrastructure.Services;
+using System.Security.Claims; 
 using UserService.API.Middleware;
 using UserService.Application.Validators;
 using UserService.Domain.Interfaces;
@@ -16,6 +17,8 @@ using UserService.Application.Interfaces;
 using UserService.Domain.Entities;
 using BCrypt.Net;
 using UserService.Application.Models;
+using System.Text.Json; 
+using UserService.API.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,7 +61,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            // Включите валидацию ролей
+            RoleClaimType = ClaimTypes.Role,
+            NameClaimType = ClaimTypes.NameIdentifier
         };
     });
 
@@ -76,18 +82,21 @@ builder.Services.AddSwaggerGen(c =>
         Description = "User Management API"
     });
     
+    // Настройка Bearer-авторизации
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme 
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
+        BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "JWT Authorization header"
+        Description = "Введите JWT токен в формате: Bearer <ваш_токен>"
     });
     
+    // Глобальное требование авторизации
     c.AddSecurityRequirement(new OpenApiSecurityRequirement 
     {
-        { 
+        {
             new OpenApiSecurityScheme 
             { 
                 Reference = new OpenApiReference 
@@ -96,12 +105,26 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer" 
                 } 
             },
-            Array.Empty<string>() 
+            new List<string>() 
         }
     });
+	c.OperationFilter<AuthResponsesOperationFilter>(); 
 });
 
 var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    await next();
+    
+    if (context.Response.StatusCode == 403)
+    {
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync(
+            JsonSerializer.Serialize(new { Error = "Доступ запрещен" })
+        );
+    }
+});
 
 // Middleware pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
