@@ -55,6 +55,7 @@ public class AuthService : IAuthService
 
         var user = new User
         {
+			Name = userDto.Name,
             Email = userDto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
             ConfirmationToken = GenerateSecureToken(),
