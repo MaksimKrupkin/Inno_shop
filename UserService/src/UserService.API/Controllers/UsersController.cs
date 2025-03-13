@@ -131,7 +131,7 @@ public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto up
 }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+		[Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             try

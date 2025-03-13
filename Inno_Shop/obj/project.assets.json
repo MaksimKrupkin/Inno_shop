@@ -86,6 +86,7 @@
       "packagesPath": "C:\\Users\\maxim\\.nuget\\packages\\",
       "outputPath": "E:\\Backend\\Csharp\\Inno_Shop\\Inno_Shop\\obj\\",
       "projectStyle": "PackageReference",
+      "UsingMicrosoftNETSdk": false,
       "configFilePaths": [
         "C:\\Users\\maxim\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
@@ -110,8 +111,7 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "all"
-      },
-      "SdkAnalysisLevel": "9.0.100"
+      }
     },
     "frameworks": {
       "net9.0": {

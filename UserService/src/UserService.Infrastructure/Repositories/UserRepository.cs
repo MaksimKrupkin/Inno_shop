@@ -57,16 +57,24 @@ public class UserRepository : IUserRepository
 
     public async Task UpdateAsync(User user)
     {
-        var existingUser = await GetByIdAsync(user.Id)
-            ?? throw new KeyNotFoundException($"User with ID {user.Id} not found");
+        // Получаем сущность БЕЗ AsNoTracking()
+        var existingUser = await _context.Users
+                               .FirstOrDefaultAsync(u => u.Id == user.Id && !u.IsDeleted)
+                           ?? throw new KeyNotFoundException($"User with ID {user.Id} not found");
 
-        _context.Entry(existingUser).CurrentValues.SetValues(user);
+        // Обновляем поля
+        existingUser.Name = user.Name;
+        existingUser.Email = user.Email;
+        existingUser.PasswordHash = user.PasswordHash;
+
         await _context.SaveChangesAsync();
     }
 
     public async Task SoftDeleteAsync(Guid id)
     {
-        var user = await GetByIdAsync(id);
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+    
         if (user != null)
         {
             user.IsDeleted = true;

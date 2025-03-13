@@ -74,21 +74,21 @@ public class UserService : IUserService
         await _userRepository.RestoreAsync(id);
     }
 
-    public async Task UpdateUserAsync(Guid id, UpdateUserDto updateDto)
+public async Task UpdateUserAsync(Guid id, UpdateUserDto updateDto)
+{
+    var user = await GetUserByIdAsync(id);
+    
+    user.Name = updateDto.Name ?? user.Name;
+    user.Email = updateDto.Email ?? user.Email;
+
+    if (!string.IsNullOrEmpty(updateDto.NewPassword))
     {
-        var user = await GetUserByIdAsync(id);
-        
-        user.Name = updateDto.Name ?? user.Name;
-        user.Email = updateDto.Email ?? user.Email;
-
-        if (!string.IsNullOrEmpty(updateDto.NewPassword))
-        {
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateDto.NewPassword);
-        }
-
-        await _userRepository.UpdateAsync(user);
-        await _userRepository.SaveChangesAsync();
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateDto.NewPassword);
     }
+
+    await _userRepository.UpdateAsync(user); // SaveChangesAsync вызывается внутри UpdateAsync
+    // Удалите эту строку: await _userRepository.SaveChangesAsync();
+}
 
     public async Task ConfirmEmailAsync(Guid userId)
     {
