@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using ProductService.Application.DTOs;
 
 namespace ProductService.Application.Validators;
 

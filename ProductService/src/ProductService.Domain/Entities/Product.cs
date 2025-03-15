@@ -12,4 +12,5 @@ public class Product
     public Guid UserId { get; set; } // ID создателя продукта
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false; // Soft Delete
+    public DateTime? UpdatedAt { get; set; }
 }

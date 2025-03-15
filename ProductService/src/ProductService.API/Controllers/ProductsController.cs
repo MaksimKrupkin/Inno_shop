@@ -2,6 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using ProductService.Application.DTOs;
 using ProductService.Application.Interfaces;
+using ProductService.Domain.Entities;
+using ProductService.Domain.Interfaces;
+using ProductService.API.Filters;
+
+
 
 [ApiController]
 [Route("api/products")]

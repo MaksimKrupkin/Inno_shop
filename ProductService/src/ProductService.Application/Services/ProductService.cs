@@ -3,6 +3,7 @@ using ProductService.Domain.Interfaces;
 using ProductService.Application.DTOs;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using ProductService.Application.Interfaces;
 
 namespace ProductService.Application.Services;
 
@@ -56,11 +57,11 @@ public class ProductService : IProductService
 
     public async Task<IEnumerable<Product>> GetProductsAsync(ProductFilterDto filter)
     {
-        _logger.LogDebug("Fetching products with filter: {@Filter}", filter);
         return await _repository.GetFilteredProductsAsync(
             filter.SearchTerm,
             filter.MinPrice,
             filter.MaxPrice,
+            filter.IsAvailable,
             filter.UserId
         );
     }
