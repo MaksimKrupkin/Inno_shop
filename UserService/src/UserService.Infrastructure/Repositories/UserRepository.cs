@@ -55,21 +55,6 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public async Task UpdateAsync(User user)
-    {
-        // Получаем сущность БЕЗ AsNoTracking()
-        var existingUser = await _context.Users
-                               .FirstOrDefaultAsync(u => u.Id == user.Id && !u.IsDeleted)
-                           ?? throw new KeyNotFoundException($"User with ID {user.Id} not found");
-
-        // Обновляем поля
-        existingUser.Name = user.Name;
-        existingUser.Email = user.Email;
-        existingUser.PasswordHash = user.PasswordHash;
-
-        await _context.SaveChangesAsync();
-    }
-
     public async Task SoftDeleteAsync(Guid id)
     {
         var user = await _context.Users
@@ -113,6 +98,34 @@ public class UserRepository : IUserRepository
             user.PasswordHash = newPasswordHash;
             await _context.SaveChangesAsync();
         }
+    }
+
+	 public async Task UpdateAsync(User user)
+    {
+        var existingUser = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == user.Id && !u.IsDeleted)
+            ?? throw new KeyNotFoundException($"User with ID {user.Id} not found");
+
+        existingUser.Name = user.Name;
+        existingUser.Email = user.Email;
+        existingUser.PasswordHash = user.PasswordHash;
+        existingUser.Role = user.Role;
+        existingUser.IsActive = user.IsActive;
+        existingUser.EmailConfirmed = user.EmailConfirmed;
+        existingUser.ConfirmationToken = user.ConfirmationToken;
+        existingUser.PasswordResetToken = user.PasswordResetToken;
+        existingUser.PasswordResetExpires = user.PasswordResetExpires;
+
+        await _context.SaveChangesAsync();
+    }
+
+	public async Task<User?> GetByPasswordResetTokenAsync(string token)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => 
+                u.PasswordResetToken == token && 
+                !u.IsDeleted
+            );
     }
 
     public async Task<bool> ExistsAsync(Guid id)

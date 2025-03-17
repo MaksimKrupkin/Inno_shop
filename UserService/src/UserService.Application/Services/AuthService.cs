@@ -55,7 +55,7 @@ public class AuthService : IAuthService
 
         var user = new User
         {
-			Name = userDto.Name,
+            Name = userDto.Name,
             Email = userDto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
             ConfirmationToken = GenerateSecureToken(),
@@ -69,66 +69,87 @@ public class AuthService : IAuthService
         return user;
     }
 
-public async Task ConfirmEmailAsync(string token)
-{
-    var user = await _userRepository.GetByConfirmationTokenAsync(token)
-        ?? throw new AuthException("Неверный токен");
-    
-    user.EmailConfirmed = true;
-    user.ConfirmationToken = null;
-    await _userRepository.UpdateAsync(user); // SaveChanges уже вызывается внутри UpdateAsync
-}
- public Task ForgotPasswordAsync(string email)
-{
-    throw new NotImplementedException();
-}
+    public async Task ConfirmEmailAsync(string token)
+    {
+        var user = await _userRepository.GetByConfirmationTokenAsync(token)
+            ?? throw new AuthException("Неверный токен");
+        
+        user.EmailConfirmed = true;
+        user.ConfirmationToken = null;
+        await _userRepository.UpdateAsync(user);
+    }
+
+    public async Task ForgotPasswordAsync(string email)
+    {
+        var user = await _userRepository.GetByEmailAsync(email);
+        if (user == null) return;
+
+        user.PasswordResetToken = GenerateSecureToken();
+        user.PasswordResetExpires = DateTime.UtcNow.AddHours(1);
+        await _userRepository.UpdateAsync(user);
+
+        var resetLink = $"http://localhost:5000/api/auth/reset-password?token={user.PasswordResetToken}";
+        await _emailService.SendEmailAsync(
+            user.Email,
+            "Password Reset Request",
+            $"Reset your password by clicking <a href='{resetLink}'>here</a>.");
+    }
 
     public async Task ResetPasswordAsync(ResetPasswordDto dto)
     {
-        throw new NotImplementedException();
+        if (dto.NewPassword != dto.ConfirmPassword)
+            throw new AuthException("Passwords do not match");
+
+        var user = await _userRepository.GetByPasswordResetTokenAsync(dto.Token);
+        if (user == null || user.PasswordResetExpires < DateTime.UtcNow)
+            throw new AuthException("Invalid or expired token");
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        user.PasswordResetToken = null;
+        user.PasswordResetExpires = null;
+
+        await _userRepository.UpdateAsync(user);
     }
 
-public string GenerateJwtToken(User user)
-{
-    var claims = new[]
+    public string GenerateJwtToken(User user)
     {
-        // Используем стандартные ClaimTypes
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, user.Role),
-        new Claim("email_confirmed", user.EmailConfirmed.ToString())
-    };
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role),
+            new Claim("email_confirmed", user.EmailConfirmed.ToString())
+        };
 
-    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-    var token = new JwtSecurityToken(
-        issuer: _jwtSettings.Issuer,
-        audience: _jwtSettings.Audience,
-        claims: claims,
-        expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-        signingCredentials: creds
-    );
+        var token = new JwtSecurityToken(
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+            signingCredentials: creds
+        );
 
-    return new JwtSecurityTokenHandler().WriteToken(token);
-}
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
 
-private async Task SendConfirmationEmail(User user)
-{
-    // Исправленный URL с указанием локального адреса
-    var confirmationLink = $"http://192.168.0.105:5000/api/auth/confirm-email?token={user.ConfirmationToken}";
-    
-    await _emailService.SendEmailAsync(
-        user.Email,
-        "Подтвердите ваш email",
-        $"Пожалуйста, подтвердите ваш email, перейдя по <a href='{confirmationLink}'>ссылке</a>");
-}
+    private async Task SendConfirmationEmail(User user)
+    {
+        var confirmationLink = $"http://192.168.0.105:5000/api/auth/confirm-email?token={user.ConfirmationToken}";
+        
+        await _emailService.SendEmailAsync(
+            user.Email,
+            "Подтвердите ваш email",
+            $"Пожалуйста, подтвердите ваш email, перейдя по <a href='{confirmationLink}'>ссылке</a>");
+    }
 
-    private static string GenerateSecureToken() => 
-        Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-}
-
-public class AuthException : Exception
-{
-    public AuthException(string message) : base(message) { }
+    private static string GenerateSecureToken()
+    {
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64))
+            .Replace('+', '-')
+            .Replace('/', '_')
+            .TrimEnd('=');
+    }
 }

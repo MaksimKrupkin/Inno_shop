@@ -18,5 +18,6 @@ public interface IUserRepository
     Task UpdatePasswordAsync(Guid userId, string newPasswordHash);
     Task<bool> ExistsAsync(Guid id);
     Task SaveChangesAsync();
+	Task<User?> GetByPasswordResetTokenAsync(string token);
     Task<User?> GetByConfirmationTokenAsync(string token); // Один метод вместо двух
 }

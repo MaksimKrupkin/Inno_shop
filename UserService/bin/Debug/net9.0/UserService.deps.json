@@ -59,6 +59,7 @@
           "Serilog.Sinks.File": "6.0.0",
           "StackExchange.Redis": "2.8.31",
           "Swashbuckle.AspNetCore": "7.3.1",
+          "System.ComponentModel.Annotations": "5.0.0",
           "System.Security.Cryptography.Xml": "8.0.0",
           "System.Text.Encodings.Web": "8.0.0",
           "xunit": "2.9.3",
@@ -176,7 +177,7 @@
           "System.Collections.Immutable.Reference": "9.0.0.0",
           "System.Collections.NonGeneric": "9.0.0.0",
           "System.Collections.Specialized": "9.0.0.0",
-          "System.ComponentModel.Annotations": "9.0.0.0",
+          "System.ComponentModel.Annotations.Reference": "9.0.0.0",
           "System.ComponentModel.DataAnnotations": "4.0.0.0",
           "System.ComponentModel": "9.0.0.0",
           "System.ComponentModel.EventBasedAsync": "9.0.0.0",
@@ -2086,6 +2087,7 @@
         }
       },
       "System.Collections.Immutable/7.0.0": {},
+      "System.ComponentModel.Annotations/5.0.0": {},
       "System.Composition/7.0.0": {
         "dependencies": {
           "System.Composition.AttributedModel": "7.0.0",
@@ -3499,7 +3501,7 @@
         },
         "compileOnly": true
       },
-      "System.ComponentModel.Annotations/9.0.0.0": {
+      "System.ComponentModel.Annotations.Reference/9.0.0.0": {
         "compile": {
           "System.ComponentModel.Annotations.dll": {}
         },
@@ -5371,6 +5373,13 @@
       "path": "system.collections.immutable/7.0.0",
       "hashPath": "system.collections.immutable.7.0.0.nupkg.sha512"
     },
+    "System.ComponentModel.Annotations/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dMkqfy2el8A8/I76n2Hi1oBFEbG1SfxD2l5nhwXV3XjlnOmwxJlQbYpJH4W51odnU9sARCSAgv7S3CyAFMkpYg==",
+      "path": "system.componentmodel.annotations/5.0.0",
+      "hashPath": "system.componentmodel.annotations.5.0.0.nupkg.sha512"
+    },
     "System.Composition/7.0.0": {
       "type": "package",
       "serviceable": true,
@@ -6473,7 +6482,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.ComponentModel.Annotations/9.0.0.0": {
+    "System.ComponentModel.Annotations.Reference/9.0.0.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""

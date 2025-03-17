@@ -15,27 +15,28 @@
 
   <ItemGroup>
     <!-- Основные пакеты ASP.NET Core 9 -->
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0"/>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2"/>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 
     <!-- Безопасные версии системных пакетов -->
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.0"/>
-    <PackageReference Include="System.Text.Encodings.Web" Version="8.0.0"/>
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.0" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" />
 
     <!-- Swagger -->
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1"/>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
 
     <!-- Основные зависимости -->
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>
-    <PackageReference Include="DotNetEnv" Version="3.1.1"/>
-    <PackageReference Include="FluentValidation" Version="11.11.0"/>
-    <PackageReference Include="MailKit" Version="4.11.0"/>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2"/>
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.2"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.2"/>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2"/>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2"/>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="DotNetEnv" Version="3.1.1" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="MailKit" Version="4.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
 
     <!-- Анализаторы -->
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
@@ -54,13 +55,13 @@
     </PackageReference>
 
     <!-- Дополнительные пакеты -->
-    <PackageReference Include="MimeKit" Version="4.11.0"/>
-    <PackageReference Include="Moq" Version="4.18.4"/>
-    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0"/>
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
-    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0"/>
-    <PackageReference Include="StackExchange.Redis" Version="2.8.31"/>
-    <PackageReference Include="xunit" Version="2.9.3"/>
+    <PackageReference Include="MimeKit" Version="4.11.0" />
+    <PackageReference Include="Moq" Version="4.18.4" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+    <PackageReference Include="xunit" Version="2.9.3" />
   </ItemGroup>
 
 </Project>
