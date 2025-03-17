@@ -26,7 +26,7 @@ builder.Services.AddControllers(); // <-- Добавлено!
 // 1. Конфигурация HttpClient с повторами и таймаутом
 builder.Services.AddHttpClient("UserService", client => 
 {
-    client.BaseAddress = new Uri("http://localhost:5002"); // Укажите правильный порт
+     client.BaseAddress = new Uri(builder.Configuration["UserService:BaseUrl"]); // Укажите правильный порт
     client.Timeout = TimeSpan.FromSeconds(30);
     client.DefaultRequestHeaders.Accept.Add(
         new MediaTypeWithQualityHeaderValue("application/json")

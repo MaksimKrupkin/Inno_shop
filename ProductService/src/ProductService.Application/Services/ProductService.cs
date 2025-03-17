@@ -155,15 +155,17 @@ public class ProductService : IProductService
 
     public async Task ValidateUserStatusAsync(Guid userId, string authorizationToken)
 {
-    var baseUri = new Uri(_userServiceBaseUrl);
-    var userInfoUri = new Uri(baseUri, $"/api/users/{userId}");
-
-	var client = _httpClientFactory.CreateClient();
+    var client = _httpClientFactory.CreateClient("UserService");
     
-    var request = new HttpRequestMessage(HttpMethod.Get, userInfoUri);
-    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authorizationToken);
+    var request = new HttpRequestMessage(HttpMethod.Get, $"/api/users/{userId}");
+    request.Headers.Authorization = new AuthenticationHeaderValue(
+        "Bearer", 
+        authorizationToken.StartsWith("Bearer ") 
+            ? authorizationToken.Substring(7) 
+            : authorizationToken);
 
     var response = await client.SendAsync(request);
+    
     if (!response.IsSuccessStatusCode)
     {
         throw new InvalidOperationException("Failed to fetch user status.");
