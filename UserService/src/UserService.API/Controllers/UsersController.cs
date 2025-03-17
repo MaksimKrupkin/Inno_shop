@@ -197,7 +197,7 @@ public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto up
         }
         
         [HttpPut("{userId}/status")]
-        [Authorize(Roles = "Admin")] // Только для администраторов
+        [Authorize(Roles = "User")] 
         public async Task<IActionResult> UpdateUserStatus(
             Guid userId, 
             [FromBody] UpdateUserStatusDto dto) // Используем DTO

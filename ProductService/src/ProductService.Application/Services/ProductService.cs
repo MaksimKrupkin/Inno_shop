@@ -75,10 +75,10 @@ public class ProductService : IProductService
 
     // Обрабатываем токен
     var token = authorizationToken.StartsWith("Bearer ") 
-        ? authorizationToken.Substring(7) 
-        : authorizationToken;
-    
-    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    ? authorizationToken.Substring(7) 
+    : authorizationToken;
+
+	request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token); 
 
     try
     {
