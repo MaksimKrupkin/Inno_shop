@@ -5,7 +5,8 @@ using ProductService.Application.Interfaces;
 using ProductService.Domain.Entities;
 using ProductService.Domain.Interfaces;
 using ProductService.API.Filters;
-
+using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
 
 [ApiController]
@@ -14,44 +15,65 @@ using ProductService.API.Filters;
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
+	private readonly ILogger<ProductsController> _logger;
 
-    public ProductsController(IProductService productService)
+    public ProductsController(
+        IProductService productService,
+        ILogger<ProductsController> logger)
     {
         _productService = productService;
+        _logger = logger; // Инициализируем логгер
     }
 
     /// <summary>
     /// Синхронизация статуса пользователя (внутренний вызов)
     /// </summary>
     [HttpPost("sync-user/{userId}")]
-    [AllowAnonymous]
-    [ApiKeyAuth] // Кастомный атрибут для проверки API-ключа
-    public async Task<IActionResult> SyncUserStatus(Guid userId, [FromBody] UserSyncDto dto)
-    {
-        await _productService.SyncUserStatusAsync(userId, dto.IsActive);
-        return NoContent();
-    }
+public async Task<IActionResult> SyncUserStatus(
+    Guid userId, 
+    [FromBody] UserSyncDto dto,
+    [FromHeader(Name = "Authorization")] string authorizationToken)
+{
+    await _productService.SyncUserStatusAsync(userId, dto.IsActive, authorizationToken);
+    return NoContent();
+}
 
     /// <summary>
     /// Создание нового продукта
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> CreateProduct([FromBody] ProductDto dto)
+public async Task<IActionResult> CreateProduct(
+    [FromBody] ProductDto dto,
+    [FromHeader(Name = "Authorization")] string authToken)
+{
+    try
     {
         var userId = GetCurrentUserId();
-        var product = await _productService.CreateProductAsync(dto, userId);
+        _logger.LogInformation("Creating product for user {UserId}", userId);
+        
+        var product = await _productService.CreateProductAsync(dto, userId, authToken);
         return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
     }
+    catch (InvalidOperationException ex)
+    {
+        _logger.LogError(ex, "User account deactivated during product creation");
+        return StatusCode(500, new { error = ex.Message });
+    }
+}
 
     /// <summary>
     /// Получение продукта по ID
     /// </summary>
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetProduct(Guid id)
+	[HttpGet("{id}")]
+public async Task<IActionResult> GetProduct(Guid id)
+{
+    var product = await _productService.GetProductByIdAsync(id);
+    if (product == null)
     {
-        var product = await _productService.GetProductByIdAsync(id);
-        return Ok(product);
+        return NotFound("Product not found");
     }
+    return Ok(product);
+}
 
     /// <summary>
     /// Получение продуктов с фильтрацией
@@ -86,11 +108,19 @@ public class ProductsController : ControllerBase
     }
 
     private Guid GetCurrentUserId()
+{
+    // Используйте кастомный claim или стандартный "sub"
+    var userIdClaim = User.Claims.FirstOrDefault(c => 
+        c.Type == ClaimTypes.NameIdentifier || 
+        c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+    );
+
+    if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
     {
-        var claim = User.FindFirst("sub")?.Value 
-            ?? throw new UnauthorizedAccessException("Invalid JWT token");
-        return Guid.Parse(claim);
+        throw new UnauthorizedAccessException("Invalid JWT token");
     }
+    return userId;
+}
 }
 
 // Внесите UserSyncDto в папку Application/DTOs

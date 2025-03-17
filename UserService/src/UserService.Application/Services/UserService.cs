@@ -74,21 +74,30 @@ public class UserService : IUserService
         await _userRepository.RestoreAsync(id);
     }
 
-public async Task UpdateUserAsync(Guid id, UpdateUserDto updateDto)
-{
-    var user = await GetUserByIdAsync(id);
-    
-    user.Name = updateDto.Name ?? user.Name;
-    user.Email = updateDto.Email ?? user.Email;
-
-    if (!string.IsNullOrEmpty(updateDto.NewPassword))
+    public async Task UpdateUserAsync(Guid id, UpdateUserDto updateDto)
     {
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateDto.NewPassword);
-    }
+        var user = await GetUserByIdAsync(id);
+        
+        user.Name = updateDto.Name ?? user.Name;
+        user.Email = updateDto.Email ?? user.Email;
 
-    await _userRepository.UpdateAsync(user); // SaveChangesAsync вызывается внутри UpdateAsync
-    // Удалите эту строку: await _userRepository.SaveChangesAsync();
-}
+        if (!string.IsNullOrEmpty(updateDto.NewPassword))
+        {
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateDto.NewPassword);
+        }
+
+        await _userRepository.UpdateAsync(user);
+    }
+    
+    public async Task UpdateUserStatusAsync(Guid userId, bool isActive)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            throw new KeyNotFoundException("User not found");
+    
+        user.IsActive = isActive;
+        await _userRepository.UpdateAsync(user);
+    }
 
     public async Task ConfirmEmailAsync(Guid userId)
     {

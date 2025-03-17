@@ -6,6 +6,8 @@ using UserService.Domain.Entities;
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using UserService.Domain.Interfaces;
+using UserService.Infrastructure.Repositories;
 
 namespace UserService.API.Controllers
 {
@@ -15,13 +17,16 @@ namespace UserService.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IUserRepository _userRepository; // Добавить
         private readonly ILogger<UsersController> _logger;
 
         public UsersController(
             IUserService userService,
+            IUserRepository userRepository, // Добавить
             ILogger<UsersController> logger)
         {
             _userService = userService;
+            _userRepository = userRepository; // Инициализировать
             _logger = logger;
         }
 
@@ -189,6 +194,38 @@ public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto up
                 Message = "User access granted",
                 UserId = userId 
             });
+        }
+        
+        [HttpPut("{userId}/status")]
+        [Authorize(Roles = "Admin")] // Только для администраторов
+        public async Task<IActionResult> UpdateUserStatus(
+            Guid userId, 
+            [FromBody] UpdateUserStatusDto dto) // Используем DTO
+        {
+            try
+            {
+                _logger.LogInformation("Updating status for user {UserId}", userId);
+        
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    _logger.LogWarning("User {UserId} not found", userId);
+                    return NotFound();
+                }
+
+                user.IsActive = dto.IsActive;
+                await _userRepository.UpdateAsync(user);
+        
+                _logger.LogInformation("User {UserId} status updated to {Status}", 
+                    userId, dto.IsActive);
+            
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating status for user {UserId}", userId);
+                return StatusCode(500, new { Error = "Internal server error" });
+            }
         }
 
 private Guid GetCurrentUserId()

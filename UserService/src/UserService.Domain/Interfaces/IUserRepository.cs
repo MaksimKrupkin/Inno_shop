@@ -11,9 +11,9 @@ public interface IUserRepository
     Task<User?> GetByEmailAsync(string email);
     Task<IEnumerable<User>> GetAllAsync();
     Task<User> AddAsync(User user);
-    Task UpdateAsync(User user);
     Task SoftDeleteAsync(Guid id);
     Task RestoreAsync(Guid id);
+    Task UpdateAsync(User user);
     Task ConfirmEmailAsync(Guid userId);
     Task UpdatePasswordAsync(Guid userId, string newPasswordHash);
     Task<bool> ExistsAsync(Guid id);

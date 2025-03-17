@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        
 
         <!-- Полное отключение генерации атрибутов -->
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>

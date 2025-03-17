@@ -11,6 +11,7 @@ public interface IUserService
     Task<User> RegisterUserAsync(UserDto userDto);
     Task<User> GetUserByIdAsync(Guid id);
     Task UpdateUserAsync(Guid id, UpdateUserDto updateDto);
+    Task UpdateUserStatusAsync(Guid userId, bool isActive);
     Task SoftDeleteUserAsync(Guid id);
     Task RestoreUserAsync(Guid id);
     Task ConfirmEmailAsync(Guid userId);

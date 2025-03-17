@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\Backend\\Csharp\\Inno_Shop\\ProductService\\ProductService.csproj": {}
+    "E:\\Backend\\Csharp\\Inno_shop\\ProductService\\ProductService.csproj": {}
   },
   "projects": {
-    "E:\\Backend\\Csharp\\Inno_Shop\\ProductService\\ProductService.csproj": {
+    "E:\\Backend\\Csharp\\Inno_shop\\ProductService\\ProductService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Backend\\Csharp\\Inno_Shop\\ProductService\\ProductService.csproj",
+        "projectUniqueName": "E:\\Backend\\Csharp\\Inno_shop\\ProductService\\ProductService.csproj",
         "projectName": "ProductService",
-        "projectPath": "E:\\Backend\\Csharp\\Inno_Shop\\ProductService\\ProductService.csproj",
+        "projectPath": "E:\\Backend\\Csharp\\Inno_shop\\ProductService\\ProductService.csproj",
         "packagesPath": "C:\\Users\\maxim\\.nuget\\packages\\",
-        "outputPath": "E:\\Backend\\Csharp\\Inno_Shop\\ProductService\\obj\\",
+        "outputPath": "E:\\Backend\\Csharp\\Inno_shop\\ProductService\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\maxim\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -54,7 +54,7 @@
             },
             "FluentValidation": {
               "target": "Package",
-              "version": "[11.5.1, )"
+              "version": "[11.11.0, )"
             },
             "FluentValidation.AspNetCore": {
               "target": "Package",
@@ -66,11 +66,11 @@
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.2, )"
             },
             "Microsoft.AspNetCore.Authorization": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.2, )"
             },
             "Microsoft.AspNetCore.Identity": {
               "target": "Package",
@@ -78,19 +78,19 @@
             },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.2, )"
             },
             "Microsoft.AspNetCore.Mvc.Testing": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.2, )"
             },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.2, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.2, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
@@ -114,7 +114,7 @@
             },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.2, )"
             },
             "Serilog.AspNetCore": {
               "target": "Package",

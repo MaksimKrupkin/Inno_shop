@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\Backend\\Csharp\\Inno_Shop\\UserService\\UserService.csproj": {}
+    "E:\\Backend\\Csharp\\Inno_shop\\UserService\\UserService.csproj": {}
   },
   "projects": {
-    "E:\\Backend\\Csharp\\Inno_Shop\\UserService\\UserService.csproj": {
+    "E:\\Backend\\Csharp\\Inno_shop\\UserService\\UserService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Backend\\Csharp\\Inno_Shop\\UserService\\UserService.csproj",
+        "projectUniqueName": "E:\\Backend\\Csharp\\Inno_shop\\UserService\\UserService.csproj",
         "projectName": "UserService",
-        "projectPath": "E:\\Backend\\Csharp\\Inno_Shop\\UserService\\UserService.csproj",
+        "projectPath": "E:\\Backend\\Csharp\\Inno_shop\\UserService\\UserService.csproj",
         "packagesPath": "C:\\Users\\maxim\\.nuget\\packages\\",
-        "outputPath": "E:\\Backend\\Csharp\\Inno_Shop\\UserService\\obj\\",
+        "outputPath": "E:\\Backend\\Csharp\\Inno_shop\\UserService\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\maxim\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -66,11 +66,11 @@
             },
             "Microsoft.AspNetCore.Authorization": {
               "target": "Package",
-              "version": "[9.0.3, )"
+              "version": "[9.0.2, )"
             },
             "Microsoft.AspNetCore.Identity": {
               "target": "Package",
-              "version": "[2.3.0, )"
+              "version": "[2.2.0, )"
             },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
@@ -82,7 +82,7 @@
             },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.2, )"
             },
             "Microsoft.CodeAnalysis.Analyzers": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
@@ -137,6 +137,14 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[7.3.1, )"
+            },
+            "System.Security.Cryptography.Xml": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "System.Text.Encodings.Web": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             },
             "xunit": {
               "target": "Package",

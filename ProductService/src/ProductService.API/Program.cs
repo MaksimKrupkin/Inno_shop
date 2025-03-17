@@ -13,53 +13,66 @@ using Microsoft.OpenApi.Models;
 using DotNetEnv;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Загрузка переменных окружения
-DotNetEnv.Env.Load();
+Env.Load();
 
-// 1. Конфигурация HttpClient
+// Добавление контроллеров (исправление ошибки AddControllers)
+builder.Services.AddControllers(); // <-- Добавлено!
+
+// 1. Конфигурация HttpClient с повторами и таймаутом
 builder.Services.AddHttpClient("UserService", client => 
+{
+    client.BaseAddress = new Uri("http://localhost:5002"); // Укажите правильный порт
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Accept.Add(
+        new MediaTypeWithQualityHeaderValue("application/json")
+    );
+})
+.ConfigurePrimaryHttpMessageHandler(() => 
+    new HttpClientHandler {
+        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => 
+            builder.Environment.IsDevelopment()
+    });
+
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"];
+if (string.IsNullOrEmpty(jwtSecretKey))
+{
+    throw new InvalidOperationException("JWT Secret Key is not configured.");
+}
+
+// 2. Аутентификация JWT (исправлена синтаксическая ошибка)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
+        };
+    });
+
+builder.Services.AddHttpClient("UserService", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["UserService:BaseUrl"]!);
 });
 
-builder.Services.AddControllers();
-
-// 2. Аутентификация JWT (исправленная версия)
-builder.Services.AddAuthentication(options => 
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer("Bearer", options =>
-{
-    // Настройки из конфигурации
-    options.Authority = builder.Configuration["Jwt:Authority"];
-    options.Audience = "product-service";
-    
-    // Дополнительные параметры валидации
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = "yourIssuer",
-        ValidAudience = "yourAudience",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("yourSecretKey"))
-    };
-});
-
 // 3. Конфигурация БД
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? throw new Exception("Connection string 'DefaultConnection' not found in configuration");
-
 builder.Services.AddDbContext<ProductDbContext>(options => 
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")!,
+        o => o.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null)));
 
-// 4. Регистрация сервисов
+// 4. Регистрация сервисов с валидацией
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService.Application.Services.ProductService>();
@@ -67,78 +80,131 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<ProductDtoValidator>();
 
-// 5. Настройка Swagger
+// 5. Настройка Swagger с Bearer Auth
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Product Service API", Version = "v1" });
-
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "JWT Authorization header using the Bearer scheme."
+builder.Services.AddSwaggerGen(c => {
+    c.SwaggerDoc("v1", new OpenApiInfo { 
+        Title = "Product Service API", 
+        Version = "v1",
+        Contact = new OpenApiContact {
+            Name = "Support",
+            Email = "support@productservice.com"
+        }
     });
+
+    var securityScheme = new OpenApiSecurityScheme {
+        Name = "JWT Authentication",
+        Description = "Enter JWT Bearer token",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+    
+    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        { securityScheme, Array.Empty<string>() }
+    });
+});
+builder.Services.AddHttpClient("UserService", client => 
+{
+    client.BaseAddress = new Uri("http://localhost:5000"); // Порт UserService
+});
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", policy => {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+builder.Services.AddLogging(loggingBuilder => 
+{
+    loggingBuilder.AddConsole();
+    loggingBuilder.AddDebug();
 });
 
 var app = builder.Build();
 
-// 6. Обработка исключений
-app.UseExceptionHandler(exceptionHandlerApp => 
-{
-    exceptionHandlerApp.Run(async context =>
-    {
+// 6. Глобальная обработка ошибок
+app.UseExceptionHandler(new ExceptionHandlerOptions {
+    AllowStatusCode404Response = true,
+    ExceptionHandler = async context => {
         var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
-        context.Response.StatusCode = exception switch
-        {
-            KeyNotFoundException => StatusCodes.Status404NotFound,
-            UnauthorizedAccessException => StatusCodes.Status403Forbidden,
-            ValidationException => StatusCodes.Status400BadRequest,
-            _ => StatusCodes.Status500InternalServerError
-        };
-        
-        await context.Response.WriteAsJsonAsync(new ProblemDetails 
-        {
+        var problemDetails = new ProblemDetails {
             Title = exception?.GetType().Name,
             Detail = exception?.Message,
-            Status = context.Response.StatusCode
-        });
-    });
+            Status = context.Response.StatusCode = exception switch {
+                KeyNotFoundException => StatusCodes.Status404NotFound,
+                UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+                ValidationException => StatusCodes.Status400BadRequest,
+                _ => StatusCodes.Status500InternalServerError
+            }
+        };
+
+        if (app.Environment.IsDevelopment()) {
+            problemDetails.Extensions["trace"] = exception?.StackTrace;
+        }
+
+        await context.Response.WriteAsJsonAsync(problemDetails);
+    }
 });
 
-// 7. Применение миграций БД
-try
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
-        db.Database.Migrate();
-        Console.WriteLine("Database migrations applied successfully");
+// 7. Автомиграции с продвинутым логированием
+if (app.Environment.IsDevelopment()) {
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+    try {
+        var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
+        if (pendingMigrations.Any()) {
+            Console.WriteLine($"Applying migrations: {string.Join(", ", pendingMigrations)}");
+            await db.Database.MigrateAsync();
+            Console.WriteLine("Migrations applied successfully");
+        }
+    }
+    catch (Exception ex) {
+        Console.WriteLine($"Migration failed: {ex.Message}");
+        throw;
     }
 }
-catch (Exception ex)
-{
-    Console.WriteLine($"Error applying migrations: {ex.Message}");
-    throw;
+
+// 8. Конфигурация Swagger только для разработки
+if (app.Environment.IsDevelopment()) {
+    app.UseSwagger();
+    app.UseSwaggerUI(c => {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Product Service V1");
+        c.OAuthClientId("swagger-ui");
+        c.OAuthAppName("Swagger UI");
+        c.RoutePrefix = "swagger";
+    });
 }
 
-// 8. Настройка Swagger UI
-app.UseSwagger();
-app.UseSwaggerUI(c => {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Product Service V1");
-    c.RoutePrefix = "swagger"; // Измените с "api/docs" на "swagger"
-});
-
-// 9. Middleware pipeline (исправленная версия)
+// 9. Middleware pipeline
 app.UseRouting();
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
+app.MapControllers().RequireAuthorization();
 
-Console.WriteLine($"Starting in {app.Environment.EnvironmentName} mode");
-Console.WriteLine($"DB Connection: {connectionString}");
+// Health check без авторизации
+app.MapGet("/health", () => Results.Ok(new {
+    status = "OK",
+    timestamp = DateTime.UtcNow
+}));
+
+// Логирование конфигурации
+Console.WriteLine($"Application started in {app.Environment.EnvironmentName} mode");
+
+// Правильное получение сервиса через scope
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetService<ProductDbContext>();
+    Console.WriteLine($"Database provider: {dbContext?.Database.ProviderName}");
+}
 
 app.Run();
