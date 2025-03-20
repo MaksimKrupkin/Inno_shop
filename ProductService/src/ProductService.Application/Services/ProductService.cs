@@ -18,33 +18,24 @@ namespace ProductService.Application.Services;
 public class ProductService : IProductService
 {
     private readonly IProductRepository _repository;
-    private readonly IMessageBroker _messageBroker;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IValidator<ProductDto> _validator;
     private readonly ILogger<ProductService> _logger;
     private readonly string _userServiceBaseUrl;
 
     public ProductService(
-        IMessageBroker messageBroker,
         IProductRepository repository,
         IHttpClientFactory httpClientFactory,
         IValidator<ProductDto> validator,
         ILogger<ProductService> logger,
         IConfiguration configuration)
     {
-        _messageBroker = messageBroker;
         _repository = repository;
         _httpClientFactory = httpClientFactory;
         _validator = validator;
         _logger = logger;
         _userServiceBaseUrl = configuration["UserService:BaseUrl"] 
-            ?? throw new ArgumentNullException("UserService:BaseUrl");
-
-        _messageBroker.Subscribe<UserDeletedEvent>(
-            "user_events",
-            "product_service_queue",
-            "user.deleted",
-            HandleUserDeleted);
+                              ?? throw new ArgumentNullException("UserService:BaseUrl");
     }
 
     public async Task<Product> CreateProductAsync(ProductDto dto, Guid userId, string authorizationToken)
