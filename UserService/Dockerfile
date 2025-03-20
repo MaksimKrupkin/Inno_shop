@@ -1,10 +1,20 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+﻿# UserService/Dockerfile
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+# Копируем всё решение
 WORKDIR /src
 COPY . .
-RUN dotnet restore "UserService.sln"
-RUN dotnet publish -c Release -o /app
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+# Восстанавливаем зависимости для всего решения
+RUN dotnet restore "Inno_Shop.sln"
+
+# Собираем конкретный проект
+RUN dotnet build "UserService/src/UserService.API/UserService.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "UserService/src/UserService.API/UserService.API.csproj" -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
-COPY --from=build /app .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "UserService.API.dll"]

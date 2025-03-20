@@ -14,6 +14,10 @@ using DotNetEnv;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Net.Http.Headers;
+using MassTransit; 
+using Shared.Infrastructure.Events;
+using ProductService.Application.Consumers;
+using Shared.Infrastructure.MessageBrokers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +70,23 @@ builder.Services.AddHttpClient("UserService", client =>
     client.BaseAddress = new Uri(builder.Configuration["UserService:BaseUrl"]!);
 });
 
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<ProductDeletionConsumer>();
+    
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+        
+        
+
+    });
+});
+
 // 3. Конфигурация БД
 builder.Services.AddDbContext<ProductDbContext>(options => 
     options.UseNpgsql(
@@ -73,12 +94,15 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
         o => o.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null)));
 
 // 4. Регистрация сервисов с валидацией
+builder.Services.AddSingleton<IMessageBroker, RabbitMqBroker>();
+builder.Services.AddScoped<ProductDeletionConsumer>();
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService.Application.Services.ProductService>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<ProductDtoValidator>();
+builder.Services.AddMassTransitHostedService();
 
 // 5. Настройка Swagger с Bearer Auth
 builder.Services.AddEndpointsApiExplorer();

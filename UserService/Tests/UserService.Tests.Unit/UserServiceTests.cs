@@ -7,6 +7,7 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using UserService.Application.Interfaces;
 using UserService.Domain.Entities;
+using Shared.Infrastructure.MessageBrokers;
 
 namespace UserService.Tests.Unit;
 
@@ -21,13 +22,16 @@ public class UserServiceTests
         var mockLogger = new Mock<ILogger<UserService.Application.Services.UserService>>();
         var mockAuthService = new Mock<IAuthService>();
         var mockEmailService = new Mock<IEmailService>();
+        var messageBrokerMock = new Mock<IMessageBroker>();
+        var emailServiceMock = new Mock<IEmailService>();
 
         var service = new UserService.Application.Services.UserService(
             mockRepo.Object,
             mockValidator.Object,
             mockLogger.Object,
             mockAuthService.Object,
-            mockEmailService.Object
+            mockEmailService.Object,
+            messageBrokerMock.Object
         );
 
         var userDto = new UserDto 

@@ -1,0 +1,13 @@
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\Shared.Infrastructure.csproj.AssemblyReference.cache
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\Shared.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\Shared.Infrastructure.AssemblyInfoInputs.cache
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\Shared.Infrastructure.AssemblyInfo.cs
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\Shared.Infrastructure.csproj.CoreCompileInputs.cache
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\Shared.Infrastructure.sourcelink.json
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\bin\Debug\net9.0\Shared.Infrastructure.deps.json
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\bin\Debug\net9.0\Shared.Infrastructure.dll
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\bin\Debug\net9.0\Shared.Infrastructure.pdb
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\Shared.Infrastructure.dll
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\refint\Shared.Infrastructure.dll
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\Shared.Infrastructure.pdb
+E:\Backend\Csharp\Inno_shop\Shared\Shared.Infrastructure\obj\Debug\net9.0\ref\Shared.Infrastructure.dll

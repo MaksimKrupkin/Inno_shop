@@ -19,6 +19,9 @@ using BCrypt.Net;
 using UserService.Application.Models;
 using System.Text.Json; 
 using UserService.API.Filters;
+using Shared.Infrastructure.MessageBrokers; 
+using MassTransit;
+using Shared.Infrastructure.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,11 +34,31 @@ builder.Configuration
 // Регистрация сервисов
 builder.Services.AddControllers();
 
+builder.Services.AddMassTransit(x => 
+{
+    x.UsingRabbitMq((context, cfg) => 
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.Publish<UserDeletedEvent>(p => 
+        {
+            p.ExchangeType = "fanout";
+        });
+    });
+});
+
 // База данных
 builder.Services.AddDbContext<UserServiceDbContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("UserDb")));
 
 // Валидация и сервисы
+builder.Services.AddSingleton<IMessageBroker>(provider => 
+    new RabbitMqBroker(provider.GetRequiredService<IBusControl>()));
+builder.Services.AddSingleton<IMessageBroker, RabbitMqBroker>();
 builder.Services.AddScoped<IValidator<UserDto>, UserDtoValidator>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();

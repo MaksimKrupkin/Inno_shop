@@ -16,6 +16,8 @@ public interface IProductRepository
         Guid? userId);
     Task SoftDeleteAsync(Guid id);
     Task RestoreAsync(Guid id);
+    
+    Task<IEnumerable<Product>> GetProductsByUserIdAsync(Guid userId);
     Task SoftDeleteProductsByUserIdAsync(Guid userId);
     Task RestoreProductsByUserIdAsync(Guid userId);
 }

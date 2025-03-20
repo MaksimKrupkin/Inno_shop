@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "Y8HAhDgekF3UESBVpq15Y17pqesNhysU4OlJOVUwHbA=",
+  "Source": "Inno_Shop",
+  "BasePath": "_content/Inno_Shop",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

@@ -68,17 +68,17 @@ public class UserRepository : IUserRepository
     }
 
     public async Task RestoreAsync(Guid id)
-    {
-        var user = await _context.Users
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(u => u.Id == id);
+{
+    var user = await _context.Users
+        .IgnoreQueryFilters() // Если используется мягкое удаление
+        .FirstOrDefaultAsync(u => u.Id == id);
 
-        if (user != null)
-        {
-            user.IsDeleted = false;
-            await _context.SaveChangesAsync();
-        }
-    }
+    if (user == null)
+        throw new KeyNotFoundException("User not found");
+
+    user.IsDeleted = false; // Или другое поле, обозначающее удаление
+    await _context.SaveChangesAsync();
+}
 
     public async Task ConfirmEmailAsync(Guid userId)
     {

@@ -157,25 +157,25 @@ public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto up
         }
 
         [HttpPost("{id}/restore")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> RestoreUser(Guid id)
-        {
-            try
-            {
-                await _userService.RestoreUserAsync(id);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "User {UserId} not found", id);
-                return NotFound(new { Error = "User not found" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error restoring user {UserId}", id);
-                return StatusCode(500, new { Error = "Internal server error" });
-            }
-        }
+[Authorize(Roles = "Admin")]
+public async Task<IActionResult> RestoreUser(Guid id)
+{
+    try
+    {
+        await _userService.RestoreUserAsync(id);
+        return NoContent();
+    }
+    catch (KeyNotFoundException ex)
+    {
+        _logger.LogWarning(ex, "User {UserId} not found", id);
+        return NotFound(new { Error = "User not found" });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error restoring user {UserId}", id);
+        return StatusCode(500, new { Error = "Internal server error" });
+    }
+}
 
         [Authorize(Roles = "Admin")]
         [HttpGet("admin-endpoint")]

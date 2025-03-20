@@ -33,6 +33,13 @@ public class ProductRepository : IProductRepository
         _context.Entry(product).State = EntityState.Modified;
         await _context.SaveChangesAsync();
     }
+    
+    public async Task<IEnumerable<Product>> GetProductsByUserIdAsync(Guid userId)
+    {
+        return await _context.Products
+            .Where(p => p.UserId == userId && !p.IsDeleted)
+            .ToListAsync();
+    }
 
     public async Task<IEnumerable<Product>> GetFilteredProductsAsync(
         string? searchTerm,

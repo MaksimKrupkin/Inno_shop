@@ -4,6 +4,8 @@ using UserService.Application.Interfaces;
 using UserService.Application.DTOs;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Shared.Infrastructure.MessageBrokers;
+using Shared.Infrastructure.Events;
 
 namespace UserService.Application.Services;
 
@@ -12,22 +14,25 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IValidator<UserDto> _userValidator;
     private readonly ILogger<UserService> _logger;
+	private readonly IMessageBroker _messageBroker;
     private readonly IAuthService _authService;
     private readonly IEmailService _emailService;
 
     public UserService(
-        IUserRepository userRepository,
-        IValidator<UserDto> userValidator,
-        ILogger<UserService> logger,
-        IAuthService authService,
-        IEmailService emailService)
-    {
-        _userRepository = userRepository;
-        _userValidator = userValidator;
-        _logger = logger;
-        _authService = authService;
-        _emailService = emailService;
-    }
+    IUserRepository userRepository,
+    IValidator<UserDto> userValidator,
+    ILogger<UserService> logger,
+    IAuthService authService,
+    IEmailService emailService,
+    IMessageBroker messageBroker)
+	{
+    _userRepository = userRepository;
+    _userValidator = userValidator;
+    _logger = logger;
+    _authService = authService;
+    _emailService = emailService;
+    _messageBroker = messageBroker; 
+	}
 
     public async Task<User> RegisterUserAsync(UserDto userDto)
     {
@@ -67,6 +72,7 @@ public class UserService : IUserService
     public async Task SoftDeleteUserAsync(Guid id)
     {
         await _userRepository.SoftDeleteAsync(id);
+        _messageBroker.Publish(new UserDeletedEvent { UserId = id }, "user_events", "user.deleted");
     }
 
     public async Task RestoreUserAsync(Guid id)
