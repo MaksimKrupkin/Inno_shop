@@ -23,29 +23,29 @@ namespace Shared.Infrastructure.MessageBrokers
         }
 
         public void Subscribe<TEvent>(
-            string exchangeName,
-            string queueName,
-            string routingKey,
-            Func<TEvent, Task> handler) where TEvent : class
+    string exchangeName,
+    string queueName,
+    string routingKey,
+    Func<TEvent, Task> handler) where TEvent : class
+{
+    _busControl.ConnectReceiveEndpoint(queueName, cfg =>
+    {
+        cfg.ConfigureConsumeTopology = false;
+        
+        if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
         {
-            _busControl.ConnectReceiveEndpoint(queueName, cfg =>
+            rmq.Bind(exchangeName, b =>
             {
-                cfg.ConfigureConsumeTopology = false;
-                
-                if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
-                {
-                    rmq.Bind(exchangeName, b =>
-                    {
-                        b.RoutingKey = routingKey;
-                        b.ExchangeType = ExchangeType.Direct;
-                    });
-                }
-
-                cfg.Handler<TEvent>(async context => 
-                {
-                    await handler(context.Message);
-                });
+                b.RoutingKey = routingKey;
+                b.ExchangeType = ExchangeType.Direct;
             });
         }
+
+        cfg.Handler<TEvent>(async context => 
+        {
+            await handler(context.Message);
+        });
+    });
+}
     }
 }
